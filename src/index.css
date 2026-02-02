@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+/* 
+ * Remotion 视频在 1920x1080 画布上渲染
+ * 增加根字体大小让 rem 单位的元素更大更宽敞
+ * 标准浏览器: 1rem = 16px
+ * Remotion 1080p: 1rem = 24px (1.5x)
+ */
+html {
+  font-size: 24px;
+}
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+}
+
+body {
+  background: #020617;
+  color: white;
+  overflow: hidden;
+}
+
+/* Text Gradient */
+.text-gradient {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glow Text - 使用 filter 实现发光效果 */
+.glow-text {
+  filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.6)) drop-shadow(0 0 60px rgba(139, 92, 246, 0.4)) drop-shadow(0 0 90px rgba(236, 72, 153, 0.3));
+}
+
+/* Stats Counter */
+.stat-value {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.05em;
+}
+
+/* Workflow Node */
+.workflow-node {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 1.5rem;
+  position: relative;
+}
+
+.workflow-node::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 12px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(139, 92, 246, 0.5));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}

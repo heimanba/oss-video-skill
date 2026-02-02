@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dify | Define & Modify - The Future of LLM Application Development</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #020617;
+            color: white;
+            overflow: hidden;
+        }
+        
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Grain Texture */
+        .grain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        
+        /* Gradient Orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.4;
+            animation: float 20s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        
+        /* Typography Effects */
+        .text-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 40px rgba(59, 130, 246, 0.5), 0 0 80px rgba(139, 92, 246, 0.3);
+        }
+        
+        /* Scene Management */
+        .scene {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .scene.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Stats Counter */
+        .stat-value {
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.05em;
+        }
+        
+        /* Avatar Grid */
+        .avatar-cluster {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 1rem;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .avatar-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.1);
+            opacity: 0;
+            transform: scale(0) translateY(50px);
+        }
+        
+        /* Workflow Diagram */
+        .workflow-node {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        .workflow-node::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 12px;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(59,130,246,0.5), rgba(139,92,246,0.5));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+        }
+        
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-500/30">
+
+    <!-- Grain Overlay -->
+    <div class="grain"></div>
+    
+    <!-- Background Orbs -->
+    <div class="orb w-96 h-96 bg-blue-600 top-[-10%] left-[-10%]"></div>
+    <div class="orb w-80 h-80 bg-purple-600 bottom-[-10%] right-[-10%] animation-delay-2000"></div>
+    <div class="orb w-64 h-64 bg-pink-600 top-[40%] left-[60%] opacity-20"></div>
+
+    <!-- SCENE 1: Origin - Define & Modify -->
+    <section id="scene-origin" class="scene active">
+        <div class="text-center max-w-4xl mx-auto">
+            <div class="mb-8 overflow-hidden">
+                <div id="logo-container" class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white text-black font-bold text-2xl mb-8 opacity-0 scale-0">
+                    <span class="text-blue-600">D</span><span class="text-slate-900">ify</span>
+                </div>
+            </div>
+            
+            <h1 class="text-6xl md:text-8xl font-bold mb-6 tracking-tighter overflow-hidden">
+                <span id="title-define" class="block text-gradient glow-text"></span>
+            </h1>
+            
+            <p class="text-xl md:text-2xl text-slate-400 font-light tracking-wide opacity-0" id="subtitle-origin">
+                Define & Modify
+            </p>
+            
+            <div class="mt-12 flex justify-center gap-8 text-sm mono text-slate-500 opacity-0" id="meta-origin">
+                <span>EST. 2023</span>
+                <span>•</span>
+                <span> v1.0 → ∞</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- SCENE 2: Growth - The Numbers -->
+    <section id="scene-growth" class="scene">
+        <div class="max-w-6xl mx-auto w-full">
+            <div class="text-center mb-16">
+                <h2 class="text-sm mono text-blue-400 tracking-[0.3em] uppercase mb-4 opacity-0" id="growth-label">Open Source Impact</h2>
+                <p class="text-slate-400 text-lg opacity-0" id="growth-desc">从第一个 commit 到全球开发者信赖的基础设施</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16">
+                <div class="text-center group">
+                    <div class="stat-value text-7xl md:text-8xl font-bold text-blue-500 mb-4 tracking-tighter opacity-0" data-target="122292" id="stat-stars">0</div>
+                    <div class="text-sm text-slate-500 tracking-widest uppercase mono opacity-0 stat-label">GitHub Stars</div>
+                    <div class="h-px w-0 bg-blue-500/50 mx-auto mt-4"></div>
+                </div>
+                
+                <div class="text-center group">
+                    <div class="stat-value text-7xl md:text-8xl font-bold text-emerald-400 mb-4 tracking-tighter opacity-0" data-target="19014" id="stat-forks">0</div>
+                    <div class="text-sm text-slate-500 tracking-widest uppercase mono opacity-0 stat-label">Forks</div>
+                    <div class="h-px w-0 bg-emerald-500/50 mx-auto mt-4 group-hover:w-full transition-all duration-700"></div>
+                </div>
+                
+                <div class="text-center group">
+                    <div class="stat-value text-7xl md:text-8xl font-bold text-purple-400 mb-4 tracking-tighter opacity-0" data-target="3000000" id="stat-installs">0</div>
+                    <div class="text-sm text-slate-500 tracking-widest uppercase mono opacity-0 stat-label">Global Installs</div>
+                    <div class="h-px w-0 bg-purple-500/50 mx-auto mt-4 group-hover:w-full transition-all duration-700"></div>
+                </div>
+            </div>
+            
+            <div class="mt-20 text-center opacity-0" id="growth-quote">
+                <p class="text-2xl md:text-3xl font-light italic text-slate-300 max-w-3xl mx-auto leading-relaxed">
+                    "从 <span class="text-white font-medium">实验性工具</span> 到 <span class="text-white font-medium">企业级LLM网关</span>，<br>
+                    只用了两年时间。"
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SCENE 3: Philosophy - More Than Tools -->
+    <section id="scene-philosophy" class="scene">
+        <div class="max-w-6xl mx-auto w-full relative h-[600px] flex items-center justify-center">
+            
+            <div class="absolute left-0 top-1/2 -translate-y-1/2 max-w-xl z-10 px-4">
+                <h2 class="text-5xl md:text-6xl font-bold mb-8 leading-tight">
+                    <span class="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">不只是</span>
+                    <span class="block text-white mt-2">工具箱</span>
+                </h2>
+                
+                <div class="space-y-6 text-lg text-slate-300 font-light leading-relaxed">
+                    <p class="philosophy-text opacity-0 translate-x-[-20px]">
+                        LangChain 是锤子与钉子，
+                    </p>
+                    <p class="philosophy-text opacity-0 translate-x-[-20px]">
+                        而 Dify 是<span class="text-white font-medium">脚手架</span>。
+                    </p>
+                    <p class="philosophy-text opacity-0 translate-x-[-20px] text-sm text-slate-400 mt-8 border-l-2 border-blue-500 pl-4">
+                        Backend as a Service + LLMOps<br>
+                        让 AI 应用开发从第一天就具备生产级能力
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Visual Metaphor: Workflow -->
+            <div class="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[400px] hidden md:block">
+                <div class="workflow-node absolute top-0 left-0 w-48">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                        <span class="text-xs mono text-blue-400">MODEL</span>
+                    </div>
+                    <p class="text-sm text-slate-400">GPT-4 / Claude / Llama</p>
+                </div>
+                
+                <div class="workflow-node absolute top-[120px] left-[100px] w-48">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-2 h-2 rounded-full bg-purple-500"></div>
+                        <span class="text-xs mono text-purple-400">ORCHESTRATION</span>
+                    </div>
+                    <p class="text-sm text-slate-400">Workflow & Agent</p>
+                </div>
+                
+                <div class="workflow-node absolute top-[240px] left-[200px] w-48">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                        <span class="text-xs mono text-emerald-400">DEPLOYMENT</span>
+                    </div>
+                    <p class="text-sm text-slate-400">API + WebApp</p>
+                </div>
+                
+                <!-- Connection Lines (SVG) -->
+                <svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: -1;">
+                    <path d="M 100 40 L 150 140" stroke="rgba(59,130,246,0.3)" stroke-width="2" fill="none" stroke-dasharray="5,5" class="draw-line"/>
+                    <path d="M 200 160 L 250 260" stroke="rgba(139,92,246,0.3)" stroke-width="2" fill="none" stroke-dasharray="5,5" class="draw-line"/>
+                </svg>
+            </div>
+        </div>
+        
+        <div class="absolute bottom-20 left-0 right-0 text-center">
+            <p class="text-slate-500 mono text-sm tracking-widest opacity-0" id="philosophy-motto">
+                简单 · 克制 · 迭代迅速
+            </p>
+        </div>
+    </section>
+
+    <!-- SCENE 4: Community - The People -->
+    <section id="scene-community" class="scene">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4 opacity-0" id="community-title">
+                <span class="text-white">600+</span> <span class="text-slate-400 font-light">Contributors</span>
+            </h2>
+            <p class="text-slate-400 opacity-0" id="community-subtitle">来自全球的开发者共同书写 LLM 应用的未来</p>
+        </div>
+        
+        <div class="avatar-cluster px-8" id="avatar-grid">
+            <!-- Avatars generated by JS -->
+        </div>
+        
+        <div class="mt-16 flex justify-center gap-8 opacity-0" id="community-stats">
+            <div class="text-center">
+                <div class="text-2xl font-bold text-white">50+</div>
+                <div class="text-xs text-slate-500 mono mt-1">Countries</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-white">5,000+</div>
+                <div class="text-xs text-slate-500 mono mt-1">Pull Requests</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-white">∞</div>
+                <div class="text-xs text-slate-500 mono mt-1">Possibilities</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SCENE 5: Future - Do It For You -->
+    <section id="scene-future" class="scene">
+        <div class="max-w-5xl mx-auto text-center px-4">
+            <div class="mb-8 inline-block">
+                <span class="mono text-xs tracking-[0.3em] text-blue-400 border border-blue-400/30 px-4 py-2 rounded-full opacity-0" id="future-badge">
+                    WHAT'S NEXT
+                </span>
+            </div>
+            
+            <h2 class="text-5xl md:text-7xl font-bold mb-8 leading-tight">
+                <span class="block opacity-0 translate-y-8" id="future-line1">Define your AI.</span>
+                <span class="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 opacity-0 translate-y-8 mt-2" id="future-line2">Modify the Future.</span>
+            </h2>
+            
+            <p class="text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed opacity-0" id="future-desc">
+                从 RAG 到 Agent，从 Workflow 到 Autonomous AI。<br>
+                Dify 正在从工具进化为 <span class="text-white font-medium">AI 应用操作系统</span>。
+            </p>
+            
+            <div class="flex flex-col sm:flex-row justify-center gap-4 opacity-0" id="future-cta">
+                <a href="https://github.com/langgenius/dify" target="_blank" class="group relative px-8 py-4 bg-white text-black font-medium rounded-full overflow-hidden">
+                    <span class="relative z-10 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        Star on GitHub
+                    </span>
+                </a>
+                <a href="https://dify.ai" target="_blank" class="px-8 py-4 border border-white/20 text-white font-medium rounded-full">
+                    Explore Dify
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Initialize GSAP Text Plugin
+        gsap.registerPlugin(TextPlugin);
+        
+        // Scene Management
+        const scenes = [
+            document.getElementById('scene-origin'),
+            document.getElementById('scene-growth'),
+            document.getElementById('scene-philosophy'),
+            document.getElementById('scene-community'),
+            document.getElementById('scene-future')
+        ];
+        let currentScene = 0;
+        let isAnimating = false;
+        
+        // Generate Avatars for Community Scene
+        const avatarGrid = document.getElementById('avatar-grid');
+        const avatarCount = 24;
+        const colors = ['bg-blue-500', 'bg-purple-500', 'bg-emerald-500', 'bg-pink-500', 'bg-orange-500'];
+        
+        for (let i = 0; i < avatarCount; i++) {
+            const div = document.createElement('div');
+            div.className = 'avatar-item';
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            div.innerHTML = `
+                <div class="w-full h-full ${color} bg-opacity-20 flex items-center justify-center text-xs font-bold text-white/60">
+                    ${String.fromCharCode(65 + Math.floor(Math.random() * 26))}
+                </div>
+            `;
+            if (i < 17) {
+                div.innerHTML = `<img src="https://i.pravatar.cc/150?img=${i + 20}" class="w-full h-full object-cover" alt="contributor">`;
+            }
+            avatarGrid.appendChild(div);
+        }
+        
+        // Scene 1: Origin Animation
+        function animateScene1() {
+            const tl = gsap.timeline({ 
+                onComplete: () => { 
+                    isAnimating = false;
+                    // 自动切换到下一个场景
+                    setTimeout(() => {
+                        if (currentScene === 0) {
+                            goToScene(1);
+                        }
+                    }, 2000); // 场景1显示2秒后自动切换
+                } 
+            });
+            
+            tl.to('#title-define', {
+                duration: 1.5,
+                text: { value: "Dify", delimiter: "" },
+                ease: "none"
+            })
+            .to('#logo-container', {
+                scale: 1,
+                opacity: 1,
+                duration: 0.8,
+                ease: "back.out(1.7)"
+            }, "-=1")
+            .to('#subtitle-origin', {
+                opacity: 1,
+                duration: 0.8,
+                letterSpacing: "0.2em"
+            }, "-=0.5")
+            .to('#meta-origin', {
+                opacity: 1,
+                duration: 0.6
+            }, "-=0.3");
+            
+            return tl;
+        }
+        
+        // Scene 2: Growth Animation
+        function animateScene2() {
+            const tl = gsap.timeline({ 
+                onComplete: () => { 
+                    isAnimating = false;
+                    // 自动切换到下一个场景
+                    setTimeout(() => {
+                        if (currentScene === 1) {
+                            goToScene(2);
+                        }
+                    }, 3000); // 场景2显示3秒后自动切换
+                } 
+            });
+            
+            tl.to('#growth-label', { opacity: 1, duration: 0.6 })
+            .to('#growth-desc', { opacity: 1, duration: 0.6 }, "-=0.4")
+            .to(['#stat-stars', '#stat-forks', '#stat-installs'], {
+                opacity: 1,
+                duration: 0.8,
+                stagger: 0.2
+            }, "-=0.3")
+            .to('.stat-label', {
+                opacity: 1,
+                duration: 0.5,
+                stagger: 0.2
+            }, "<");
+            
+            const counters = [
+                { el: '#stat-stars', target: 122292, suffix: '' },
+                { el: '#stat-forks', target: 19014, suffix: '' },
+                { el: '#stat-installs', target: 300, suffix: '万+' }
+            ];
+            
+            counters.forEach((counter, index) => {
+                tl.to(counter.el, {
+                    innerText: counter.target,
+                    duration: 2,
+                    ease: "power2.out",
+                    snap: { innerText: 1 },
+                    onUpdate: function() {
+                        if (counter.suffix.includes('万')) {
+                            this.targets()[0].innerText = Math.floor(this.targets()[0].innerText) + counter.suffix;
+                        } else {
+                            this.targets()[0].innerText = Math.floor(this.targets()[0].innerText).toLocaleString();
+                        }
+                    }
+                }, index === 0 ? "-=1" : "<0.2");
+            });
+            
+            tl.to('#growth-quote', {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                ease: "power3.out"
+            }, "+=0.5");
+            
+            return tl;
+        }
+        
+        // Scene 3: Philosophy Animation
+        function animateScene3() {
+            const tl = gsap.timeline({ 
+                onComplete: () => { 
+                    isAnimating = false;
+                    // 自动切换到下一个场景
+                    setTimeout(() => {
+                        if (currentScene === 2) {
+                            goToScene(3);
+                        }
+                    }, 3000); // 场景3显示3秒后自动切换
+                } 
+            });
+            
+            tl.to('.philosophy-text', {
+                opacity: 1,
+                x: 0,
+                duration: 0.8,
+                stagger: 0.3,
+                ease: "power3.out"
+            })
+            .to('.workflow-node', {
+                opacity: 1,
+                y: 0,
+                duration: 0.6,
+                stagger: 0.2
+            }, "-=1")
+            .to('#philosophy-motto', {
+                opacity: 1,
+                duration: 1
+            }, "+=0.5");
+            
+            return tl;
+        }
+        
+        // Scene 4: Community Animation
+        function animateScene4() {
+            const tl = gsap.timeline({ 
+                onComplete: () => { 
+                    isAnimating = false;
+                    // 自动切换到下一个场景
+                    setTimeout(() => {
+                        if (currentScene === 3) {
+                            goToScene(4);
+                        }
+                    }, 3000); // 场景4显示3秒后自动切换
+                } 
+            });
+            
+            tl.to('#community-title', { opacity: 1, duration: 0.8 })
+            .to('#community-subtitle', { opacity: 1, duration: 0.6 }, "-=0.4")
+            .to('.avatar-item', {
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                duration: 0.5,
+                stagger: {
+                    amount: 1.5,
+                    from: "center"
+                },
+                ease: "back.out(1.4)"
+            }, "-=0.3")
+            .to('#community-stats', { opacity: 1, duration: 0.8 }, "-=0.5");
+            
+            return tl;
+        }
+        
+        // Scene 5: Future Animation
+        function animateScene5() {
+            const tl = gsap.timeline({ 
+                onComplete: () => { 
+                    isAnimating = false;
+                    // 最后一个场景，3秒后循环回到第一个场景
+                    setTimeout(() => {
+                        if (currentScene === 4) {
+                            goToScene(0);
+                        }
+                    }, 3000); // 场景5显示3秒后循环
+                } 
+            });
+            
+            tl.to('#future-badge', { opacity: 1, duration: 0.6 })
+            .to('#future-line1', { opacity: 1, y: 0, duration: 0.8 }, "-=0.3")
+            .to('#future-line2', { opacity: 1, y: 0, duration: 0.8 }, "-=0.6")
+            .to('#future-desc', { opacity: 1, duration: 0.8 }, "-=0.4")
+            .to('#future-cta', { opacity: 1, duration: 0.6 }, "-=0.2");
+            
+            return tl;
+        }
+        
+        // Main Timeline Controller
+        const sceneAnimations = [animateScene1, animateScene2, animateScene3, animateScene4, animateScene5];
+        
+        function goToScene(index) {
+            if (isAnimating || index === currentScene) return;
+            if (index < 0 || index >= scenes.length) return;
+            
+            isAnimating = true;
+            
+            gsap.to(scenes[currentScene], {
+                opacity: 0,
+                duration: 0.5,
+                onComplete: () => {
+                    scenes[currentScene].classList.remove('active');
+                    scenes[index].classList.add('active');
+                    currentScene = index;
+                    
+                    gsap.set(scenes[index], { opacity: 1 });
+                    sceneAnimations[index]();
+                }
+            });
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            sceneAnimations[0]();
+        });
+        
+        // Pause when tab hidden
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                gsap.globalTimeline.pause();
+            } else {
+                gsap.globalTimeline.resume();
+            }
+        });
+    </script>
+</body>
+</html>
